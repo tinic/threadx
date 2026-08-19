@@ -546,6 +546,24 @@ VOID            (*temp_mutex_release)(TX_THREAD *thread_ptr);
         test_control_return(1);
     }
 
+    /* Attempt to create a thread whose stack wholly contains thread 0's.
+       Checking only whether the new endpoints lie inside an existing range
+       misses this overlap.  tx_application_define() deliberately left 200
+       bytes in front of thread 0's stack for boundary tests like this one. */
+    pointer =  thread_0.tx_thread_stack_start;
+    pointer =  pointer - 100;
+    status =  tx_thread_create(&thread_1, "thread 1", thread_0_entry, 1,
+            pointer, TEST_STACK_SIZE_PRINTF + 200,
+            16, 16, TX_NO_TIME_SLICE, TX_AUTO_START);
+
+    /* Check for status.  */
+    if (status != TX_PTR_ERROR)
+    {
+
+        printf("ERROR #8a\n");
+        test_control_return(1);
+    }
+
     /* Attempt to create a thread an extra small stack.  */
     pointer =  (CHAR *) not_used_stack;
     status =  tx_thread_create(&thread_1, "thread 1", thread_0_entry, 1,

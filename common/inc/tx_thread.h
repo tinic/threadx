@@ -258,6 +258,14 @@
 #endif
 
 
+/* Define the post-stack-build status hook to success, if the port does not
+   need to report a failure from its otherwise-void stack builder.  */
+
+#ifndef TX_THREAD_STACK_BUILD_STATUS
+#define TX_THREAD_STACK_BUILD_STATUS(t) TX_SUCCESS
+#endif
+
+
 /* Define internal thread control function prototypes.  */
 
 VOID        _tx_thread_initialize(VOID);
@@ -516,4 +524,3 @@ THREAD_DECLARE  TX_THREAD *     _tx_thread_performance_execute_log[TX_THREAD_EXE
 #endif
 
 #endif
-

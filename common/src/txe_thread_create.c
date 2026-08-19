@@ -154,36 +154,18 @@ TX_THREAD       *current_thread;
                 break;
             }
 
-            /* Check the stack pointer to see if it overlaps with this thread's stack.  */
-            if (stack_start >= next_thread -> tx_thread_stack_start)
+            /* Inclusive ranges overlap unless one lies wholly before the
+               other.  Checking endpoints independently misses a new stack
+               that completely contains an existing one.  */
+            if ((stack_start <= next_thread -> tx_thread_stack_end) &&
+                (stack_end >= next_thread -> tx_thread_stack_start))
             {
+                /* This stack overlaps with an existing thread, clear the stack pointer to
+                   force a stack error below.  */
+                stack_start =  TX_NULL;
 
-                if (stack_start < next_thread -> tx_thread_stack_end)
-                {
-
-                    /* This stack overlaps with an existing thread, clear the stack pointer to
-                       force a stack error below.  */
-                    stack_start =  TX_NULL;
-
-                    /* Set the break flag.  */
-                    break_flag =  TX_TRUE;
-                }
-            }
-
-            /* Check the end of the stack to see if it is inside this thread's stack area as well.  */
-            if (stack_end >= next_thread -> tx_thread_stack_start)
-            {
-
-                if (stack_end < next_thread -> tx_thread_stack_end)
-                {
-
-                    /* This stack overlaps with an existing thread, clear the stack pointer to
-                       force a stack error below.  */
-                    stack_start =  TX_NULL;
-
-                    /* Set the break flag.  */
-                    break_flag =  TX_TRUE;
-                }
+                /* Set the break flag.  */
+                break_flag =  TX_TRUE;
             }
 
             /* Move to the next thread.  */
@@ -302,4 +284,3 @@ TX_THREAD       *current_thread;
     /* Return completion status.  */
     return(status);
 }
-

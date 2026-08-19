@@ -87,6 +87,7 @@ TX_THREAD               *next_thread;
 TX_THREAD               *previous_thread;
 TX_THREAD               *saved_thread_ptr;
 UINT                    saved_threshold =  ((UINT) 0);
+UINT                    status;
 UCHAR                   *temp_ptr;
 
 #ifdef TX_ENABLE_STACK_CHECKING
@@ -205,6 +206,15 @@ ALIGN_TYPE              updated_stack_start;
        thread's initial stack and to setup the actual stack pointer in the
        control block.  */
     _tx_thread_stack_build(thread_ptr, _tx_thread_shell_entry);
+
+    /* Hosted ports may have to allocate a native thread in their stack
+       builder.  Do not publish or auto-start a thread whose backing object
+       could not be created.  */
+    status =  TX_THREAD_STACK_BUILD_STATUS(thread_ptr);
+    if (status != TX_SUCCESS)
+    {
+        return(status);
+    }
 
 #ifdef TX_ENABLE_STACK_CHECKING
 
@@ -367,7 +377,6 @@ ALIGN_TYPE              updated_stack_start;
 #endif
     }
 
-    /* Always return a success.  */
-    return(TX_SUCCESS);
+    /* Return success.  */
+    return(status);
 }
-
