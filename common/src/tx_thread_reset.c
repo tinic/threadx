@@ -132,20 +132,31 @@ UINT            status;
            control block.  */
         _tx_thread_stack_build(thread_ptr, _tx_thread_shell_entry);
 
+        /* Hosted ports may fail to recreate the native backing thread.  Keep
+           the object terminated so the caller can retry or delete it. */
+        status =  TX_THREAD_STACK_BUILD_STATUS(thread_ptr);
+
         /* Disable interrupts.  */
         TX_DISABLE
 
-        /* Finally, move into a suspended state to allow for the thread to be resumed.  */
-        thread_ptr -> tx_thread_state =  TX_SUSPENDED;
+        if (status == TX_SUCCESS)
+        {
+            /* Finally, move into a suspended state to allow for the thread to be resumed.  */
+            thread_ptr -> tx_thread_state =  TX_SUSPENDED;
 
-        /* If trace is enabled, insert this event into the trace buffer.  */
-        TX_TRACE_IN_LINE_INSERT(TX_TRACE_THREAD_RESET, thread_ptr, thread_ptr -> tx_thread_state, 0, 0, TX_TRACE_THREAD_EVENTS)
+            /* If trace is enabled, insert this event into the trace buffer.  */
+            TX_TRACE_IN_LINE_INSERT(TX_TRACE_THREAD_RESET, thread_ptr, thread_ptr -> tx_thread_state, 0, 0, TX_TRACE_THREAD_EVENTS)
 
-        /* Log this kernel call.  */
-        TX_EL_THREAD_RESET_INSERT
+            /* Log this kernel call.  */
+            TX_EL_THREAD_RESET_INSERT
 
-        /* Log the thread status change.  */
-        TX_EL_THREAD_STATUS_CHANGE_INSERT(thread_ptr, TX_SUSPENDED)
+            /* Log the thread status change.  */
+            TX_EL_THREAD_STATUS_CHANGE_INSERT(thread_ptr, TX_SUSPENDED)
+        }
+        else
+        {
+            thread_ptr -> tx_thread_state =  TX_TERMINATED;
+        }
     }
 
     /* Restore interrupts.  */
@@ -154,4 +165,3 @@ UINT            status;
     /* Return completion status to caller.  */
     return(status);
 }
-
