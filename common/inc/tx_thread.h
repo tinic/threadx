@@ -251,6 +251,18 @@
 #endif
 
 
+/* Define the default pre-relinquish port hook to whitespace, if it hasn't
+   been defined previously (typically in tx_port.h).  A port whose wakeup
+   delivery happens at scheduling points rather than asynchronously can use
+   it to bring the ready lists up to date before _tx_thread_relinquish()
+   decides whether anything else deserves the processor; on every other port
+   the ready lists are already the truth and the hook stays whitespace.  */
+
+#ifndef TX_THREAD_RELINQUISH_PORT_PREPARE
+#define TX_THREAD_RELINQUISH_PORT_PREPARE
+#endif
+
+
 /* Define the thread create internal extension macro to whitespace, if it hasn't been defined previously (typically in tx_port.h).  */
 
 #ifndef TX_THREAD_CREATE_INTERNAL_EXTENSION

@@ -79,6 +79,12 @@ TX_THREAD       *thread_ptr;
     /* Pickup thread pointer.  */
     TX_THREAD_GET_CURRENT(thread_ptr)
 
+    /* Give the port a chance to bring the ready lists up to date first: on a
+       port that delivers wakeups at scheduling points rather than
+       asynchronously, threads this relinquish should yield to may not be
+       ready yet.  Defined to whitespace unless the port says otherwise.  */
+    TX_THREAD_RELINQUISH_PORT_PREPARE
+
 #ifdef TX_ENABLE_STACK_CHECKING
 
     /* Check this thread's stack.  */
