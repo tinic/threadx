@@ -61,8 +61,31 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. threadx)
 add_subdirectory(regression)
 add_subdirectory(samples)
 
+# The two configurations this change has to reach, TX_NOT_INTERRUPTABLE and
+# TX_DISABLE_ERROR_CHECKING, are not among the five above and cannot be reached
+# from the regression suite, which links one library per configuration. This
+# directory compiles the sources concerned directly. It is listed last rather than
+# beside regression on purpose: every branch in the current fix set adds an
+# add_subdirectory line immediately after regression, and putting a second one
+# there turns a set of clean merges into a set of one-line conflicts.
+add_subdirectory(thread_transition)
+
 # Coverage
-if(CMAKE_BUILD_TYPE MATCHES ".*_coverage")
+#
+# The gate here used to be the build type alone, and only one of the five
+# configurations -- default_build_coverage -- has a name matching "*_coverage".
+# So four configurations built and ran every test and their coverage was thrown
+# away. That is not redundancy discarded: each configuration selects a different
+# set of TX_ feature macros, so the code the other four compile is *absent from
+# the denominator* rather than reported as uncovered. A figure taken from one of
+# them is the executable-line count of one configuration, not of the kernel.
+#
+# TX_COVERAGE instruments a build regardless of its name. It defaults to OFF and
+# the build-type match is kept, so configuring a single configuration by hand
+# behaves exactly as it did before; the regression run turns it on for all five
+# and merges the results.
+option(TX_COVERAGE "Instrument this build for coverage regardless of build type" OFF)
+if(TX_COVERAGE OR CMAKE_BUILD_TYPE MATCHES ".*_coverage")
   if(NOT MSVC)
     target_compile_options(threadx PRIVATE -fprofile-arcs -ftest-coverage)
     target_link_options(threadx PRIVATE -fprofile-arcs -ftest-coverage)
