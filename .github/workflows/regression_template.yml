@@ -1,4 +1,5 @@
 # This is a basic workflow that is manually triggered
+# Portions of this file were generated with AI assistance.
 
 name: regression_template
 
@@ -165,7 +166,12 @@ jobs:
           ${{ inputs.cmake_path }}/build/*/Testing/**/*.xml
           ${{ inputs.cmake_path }}/build/**/regression/output_files/*.bin
 
+    # Only the Pages upload below needs Pages configured, so this takes its
+    # condition on the inputs.  A run with skip_deploy or skip_coverage never
+    # uploads, and on a repository without Pages enabled an unconditional
+    # configure fails the job after its tests have passed.
     - name: Configure GitHub Pages
+      if: ${{ !inputs.skip_deploy && !inputs.skip_coverage }}
       uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
     # The coverage steps below run even when a test failed. cmake_bootstrap.sh
