@@ -1,3 +1,4 @@
+# Portions of this file were generated with AI assistance.
 name: regression_test
 
 # Runs the ThreadX, SMP and FreeRTOS-compatibility regression suites.
@@ -144,7 +145,12 @@ jobs:
     # which branch the published report describes. Moving that answer to dev
     # is a separate decision, and it needs the environment setting changed
     # as well as this line removed.
-    if: github.ref == 'refs/heads/master'
+    #
+    # The report is the upstream project's, published from its own
+    # repository.  A fork's master runs the same suites and has no Pages
+    # site to deploy to, so on a fork the job is skipped rather than failed
+    # after every suite has passed.
+    if: github.repository == 'eclipse-threadx/threadx' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       issues: read
